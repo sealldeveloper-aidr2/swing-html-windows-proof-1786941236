@@ -11,7 +11,7 @@ jobs:
           distribution: temurin
           java-version: '21'
       - name: Compile and run
-        shell: pwsh
+        shell: cmd
         run: |
           javac SwingWindowsProof.java
-          java -Djava.awt.headless=true SwingWindowsProof
+          java SwingWindowsProof
