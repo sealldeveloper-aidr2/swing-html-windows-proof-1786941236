@@ -1,25 +1,20 @@
-name: Windows Swing proof
+name: Windows environment diagnostic
 on:
   workflow_dispatch:
 jobs:
   proof:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-      - name: Test rendered HTTP NTLM
+      - name: Diagnose isolated SMB options
         shell: pwsh
         run: |
-          python -m pip install impacket
-          $p = Start-Process python -ArgumentList 'ntlmcap.py' -RedirectStandardOutput ntlm.out -RedirectStandardError ntlm.err -PassThru
-          Start-Sleep -Seconds 3
-          javac SwingWindowsProof.java
-          java SwingWindowsProof
-          Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-          Write-Host '--- NTLM STDOUT ---'
-          Get-Content ntlm.out -ErrorAction SilentlyContinue
-          Write-Host '--- NTLM STDERR ---'
-          Get-Content ntlm.err -ErrorAction SilentlyContinue
+          Write-Host '--- services and port ---'
+          Get-Service LanmanServer,WebClient -ErrorAction SilentlyContinue | Format-List *
+          Get-NetTCPConnection -LocalPort 445 -ErrorAction SilentlyContinue | Format-List *
+          netstat -ano | Select-String ':445'
+          Write-Host '--- docker ---'
+          docker version
+          docker info
+          Write-Host '--- wsl ---'
+          wsl --status
+          wsl -l -v
